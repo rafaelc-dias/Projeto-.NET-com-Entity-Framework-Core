@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 
 namespace APIControleFrotas.Models.Infrastructure.Repositories
 {
-    public interface VeiculoRepositorio
+    public interface IVeiculoRepositorio
     {
         Task Cadastrar(Veiculo veiculo);
         Task Atualizar(Veiculo veiculo);

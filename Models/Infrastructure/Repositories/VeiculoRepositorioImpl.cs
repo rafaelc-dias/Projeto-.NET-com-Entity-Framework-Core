@@ -1,11 +1,12 @@
 ﻿using ControleFrotas.Models.Domain.Entites;
 using ControleFrotas.Models.Insfrastructure.Context;
+using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace APIControleFrotas.Models.Infrastructure.Repositories
 {
-    public class VeiculoRepositorioImpl : VeiculoRepositorio
+    public class VeiculoRepositorioImpl : IVeiculoRepositorio
     {
         private readonly ControleFrotaContext context;
         public VeiculoRepositorioImpl(ControleFrotaContext context)
@@ -13,34 +14,63 @@ namespace APIControleFrotas.Models.Infrastructure.Repositories
             this.context = context;
         }
 
-        public Task Atualizar(Veiculo veiculo)
+        public async Task Atualizar(Veiculo veiculo)
         {
-            throw new System.NotImplementedException();
+            var veiculopesquisado = await Pesquisar(veiculo.VeiculoId);
+            if (veiculo != null && !string.IsNullOrEmpty(veiculo.VeiculoId) && veiculo.VeiculoId.Equals(veiculo.VeiculoId))
+            {
+                veiculopesquisado.Modelo = veiculo.Modelo;
+                veiculopesquisado.Placa = veiculo.Placa;
+                veiculopesquisado.Ano = veiculo.Ano;
+
+                context.Veiculos.Update(veiculopesquisado);
+                await context.SaveChangesAsync();
+            }
+
+                
         }
 
-        public Task Cadastrar(Veiculo veiculo)
+        public async Task Cadastrar(Veiculo veiculo)
         {
-            throw new System.NotImplementedException();
+            await context.Veiculos.AddAsync(veiculo);
+            await context.SaveChangesAsync();
         }
 
-        public Task Excluir(string veiculoId)
+        public async Task Excluir(string veiculoId)
         {
-            throw new System.NotImplementedException();
+            var veiculo = await Pesquisar(veiculoId);
+            if (veiculo != null && !string.IsNullOrEmpty(veiculo.VeiculoId) && veiculo.VeiculoId.Equals(veiculoId))
+                context.Remove(veiculo);
+                await context.SaveChangesAsync();
         }
 
-        public Task<List<Veiculo>> Listar()
+        public async Task<List<Veiculo>> Listar()
         {
-            throw new System.NotImplementedException();
+            return await context.Veiculos.ToListAsync();
         }
 
-        public Task<List<Veiculo>> Listar2()
+        public async Task<List<Veiculo>> Listar2()
         {
-            throw new System.NotImplementedException();
+            var result = await context.Veiculos
+                .Include(x => x.Motoristas)
+                .ThenInclude(xx => xx.Veiculo)
+                .ToListAsync();
+
+            foreach (var veiculo in result)
+            {
+                foreach (var itemveiculo in veiculo.Motoristas)
+                {
+                    itemveiculo.Motorista = await context.Motoristas.FirstOrDefaultAsync(m => m.MotoristaId.Equals(itemveiculo.MotoristaId));
+                }
+            }   
+
+
+            return result;
         }
 
-        public Task<Veiculo> Pesquisar(string veiculoId)
+        public async Task<Veiculo> Pesquisar(string veiculoId)
         {
-            throw new System.NotImplementedException();
+            return await context.Veiculos.FirstOrDefaultAsync(v => v.VeiculoId.Equals(veiculoId));
         }
     }
 }

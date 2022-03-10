@@ -1,3 +1,4 @@
+using APIControleFrotas.Models.Application.Services;
 using APIControleFrotas.Models.Infrastructure.Repositories;
 using ControleFrotas.Models.Insfrastructure.Context;
 using Microsoft.AspNetCore.Builder;
@@ -32,7 +33,9 @@ namespace APIControleFrotas
 
             services.AddDbContext<ControleFrotaContext>(options => options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
 
-            services.AddScoped<VeiculoRepositorio, VeiculoRepositorioImpl>();
+            services.AddScoped<IVeiculoRepositorio, VeiculoRepositorioImpl>();
+
+            services.AddScoped<IVeiculoServico, VeiculoServiceImpl>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
